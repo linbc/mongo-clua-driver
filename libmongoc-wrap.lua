@@ -3,7 +3,7 @@ local libmongoc = ffi.load(ffi.os == "OSX" and "libmongoc-1.0.dylib" or "libmong
 
 require "libbson-wrap"
 
---from 
+--from...
 ffi.cdef[[
 
 typedef struct _mongoc_index_opt_t mongoc_index_opt_t;
@@ -28,11 +28,7 @@ typedef enum
 } mongoc_read_mode_t;
 
 
-typedef struct _mongoc_read_prefs_t
-{
-   mongoc_read_mode_t mode;
-   bson_t             tags;
-} mongoc_read_prefs_t;
+typedef struct _mongoc_read_prefs_t mongoc_read_prefs_t;
 
 
 ]]
