@@ -32,8 +32,8 @@ typedef enum
 
 typedef struct _bson_oid_t bson_oid_t;
 typedef struct _bson_error_t bson_error_t;
-typedef struct _bson_t bson_t;
-typedef struct {char __[1024];} bson_iter_t;
+typedef struct {char __[128];} bson_t;
+typedef struct {char __[128];} bson_iter_t;
 typedef long long time_t;
 
 ]]
@@ -153,7 +153,7 @@ bson_append_time_t (bson_t     *bson,
 ]]
 
 
-local function test_libbson( )
+local function test_libbson_cfunction( )
 	--构造一个bson对象{a:1, b:-1, c:0.1, d:"linbc"}
 	local doc = libbson.bson_new()
 
@@ -168,8 +168,7 @@ local function test_libbson( )
 	libbson.bson_append_utf8(doc, key, string.len(key), 'linbc', 5)
 
 	--开始从档里读数据了
---	local iter = ffi.gc( ffi.new('bson_iter_t'), ffi.C.free)
-	local iter = ffi.new('bson_iter_t')
+	local iter = ffi.gc( ffi.new('bson_iter_t'), ffi.free)
 	libbson.bson_iter_init (iter, doc)
 	while libbson.bson_iter_next(iter) do
 		local key = ffi.string( libbson.bson_iter_key(iter) )
@@ -177,7 +176,7 @@ local function test_libbson( )
 		if t == libbson.BSON_TYPE_DOUBLE then
 			print(key,	t, libbson.bson_iter_double(iter))
 		elseif t == libbson.BSON_TYPE_UTF8 then
-			local buflen = ffi.new("uint32_t[1]", 1)
+			local buflen = ffi.gc( ffi.new("uint32_t[1]", 1), ffi.free)
 			local utf8 = libbson.bson_iter_utf8(iter, buflen)
 			print(key,	t, ffi.string(utf8))
 		elseif t == libbson.BSON_TYPE_INT32 then
@@ -192,4 +191,4 @@ local function test_libbson( )
 	libbson.bson_destroy(doc)
 end
 
-test_libbson()
+
