@@ -32,7 +32,7 @@ typedef enum
 
 typedef struct _bson_oid_t bson_oid_t;
 typedef struct _bson_error_t bson_error_t;
-typedef struct {char __[128];} bson_t;
+typedef struct _bson_t bson_t;
 typedef struct {char __[128];} bson_iter_t;
 typedef long long time_t;
 
