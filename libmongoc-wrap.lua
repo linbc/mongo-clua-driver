@@ -290,7 +290,7 @@ local function test_mongo_find(coll )
   local cursor = libmongoc.mongoc_collection_find(coll, 0, 0, 0, 0, query, nil, nil)
 
   local doc = ffi.new('const bson_t*[1]')--ffi.typeof("bson_t *[?]")
-  while libmongoc.mongoc_cursor_more(cursor) and libmongoc.mongoc_cursor_next(cursor, doc) do
+  while libmongoc.mongoc_cursor_next(cursor, doc) do
     local cstr = libbson.bson_as_json(doc[0], nil)
     print(ffi.string(cstr))
     libbson.bson_free(cstr)
@@ -301,6 +301,7 @@ local function test_mongo_find(coll )
 end
 
 function test_mongo_c_driver( )
+  --参考：http://api.mongodb.org/c/1.3.0/tutorial.html#find
   --日志处理函数
   local printLog = ffi.cast('mongoc_log_func_t', function ( log_level, log_domain, message, user_data )
     --print(log_level, ffi.string(log_domain), ffi.string(message))
