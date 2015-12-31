@@ -1,7 +1,7 @@
 local ffi = require("ffi")
 local libmongoc = ffi.load(ffi.os == "OSX" and "libmongoc-1.0.dylib" or "libmongoc-1.0.so")
 
-require "libbson-wrap"
+local libbson = require "libbson-wrap"
 
 --from...
 ffi.cdef[[
@@ -12,6 +12,41 @@ typedef struct _mongoc_update_flags_t mongoc_update_flags_t;
 typedef struct _mongoc_remove_flags_t mongoc_remove_flags_t;
 typedef struct _mongoc_find_and_modify_opts_t mongoc_find_and_modify_opts_t;
 typedef struct _mongoc_database_t mongoc_database_t;
+
+void
+mongoc_init (void);
+
+void
+mongoc_cleanup (void);
+
+]]
+
+--from mongoc-log.h
+ffi.cdef[[
+
+typedef enum
+{
+   MONGOC_LOG_LEVEL_ERROR,
+   MONGOC_LOG_LEVEL_CRITICAL,
+   MONGOC_LOG_LEVEL_WARNING,
+   MONGOC_LOG_LEVEL_MESSAGE,
+   MONGOC_LOG_LEVEL_INFO,
+   MONGOC_LOG_LEVEL_DEBUG,
+   MONGOC_LOG_LEVEL_TRACE,
+} mongoc_log_level_t;
+
+typedef void (*mongoc_log_func_t) (mongoc_log_level_t  log_level,
+                                   const char         *log_domain,
+                                   const char         *message,
+                                   void               *user_data);
+
+void mongoc_log_set_handler (mongoc_log_func_t  log_func,
+                             void              *user_data);
+
+void mongoc_log_default_handler (mongoc_log_level_t  log_level,
+                                 const char         *log_domain,
+                                 const char         *message,
+                                 void               *user_data);
 
 ]]
 
@@ -229,3 +264,67 @@ mongoc_cursor_t               *mongoc_client_find_databases       (mongoc_client
 
 
 ]]
+
+--测试插入
+local function test_mongo_insert( coll )
+  ffi.cdef[[
+    int rand(void);
+    void srand(unsigned seed);
+    time_t time(void*);
+  ]]
+
+  local row = ffi.gc(libbson.bson_new(), libbson.bson_destroy)
+  for i=1,100 do
+    libbson.bson_reinit(row)
+    local name = string.format('linbc%d',i)
+    libbson.bson_append_utf8(row, 'name', string.len('name'), name, string.len(name))
+    libbson.bson_append_int32(row, 'age', string.len('age'), ffi.C.rand()%99)
+
+    libmongoc.mongoc_collection_insert(coll, 0, row, nil, nil)
+  end
+end
+
+--测试查找
+local function test_mongo_find(coll )
+  local query = ffi.gc(libbson.bson_new(), libbson.bson_destroy)
+  local cursor = libmongoc.mongoc_collection_find(coll, 0, 0, 0, 0, query, nil, nil)
+
+  local doc = ffi.new('const bson_t*[1]')--ffi.typeof("bson_t *[?]")
+  while libmongoc.mongoc_cursor_more(cursor) and libmongoc.mongoc_cursor_next(cursor, doc) do
+    local cstr = libbson.bson_as_json(doc[0], nil)
+    print(ffi.string(cstr))
+    libbson.bson_free(cstr)
+  end
+
+  local er = ffi.new('bson_error_t[1]')
+  libmongoc.mongoc_cursor_destroy(cursor)
+end
+
+function test_mongo_c_driver( )
+  --日志处理函数
+  local printLog = ffi.cast('mongoc_log_func_t', function ( log_level, log_domain, message, user_data )
+    --print(log_level, ffi.string(log_domain), ffi.string(message))
+  end)
+  libmongoc.mongoc_log_set_handler(printLog,nil)
+
+  local authuristr = "mongodb://user,=:pass@127.0.0.1/test?authMechanism=SCRAM-SHA-1"
+  libmongoc.mongoc_init()
+  local  client = libmongoc.mongoc_client_new(authuristr)
+  if not client then
+    error( 'failed to parse SCRAM uri\n')
+  end
+
+  local collection = libmongoc.mongoc_client_get_collection(client, 'test', 'test')
+  --测试插入
+--  test_mongo_insert(collection)
+  test_mongo_find(collection)
+  libmongoc.mongoc_collection_destroy(collection)
+
+  libmongoc.mongoc_client_destroy(client)
+  libmongoc.mongoc_cleanup()
+
+  --日志函数记得回收
+  printLog:free()
+end
+
+test_mongo_c_driver()

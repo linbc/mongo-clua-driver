@@ -1,6 +1,12 @@
 local ffi = require("ffi")
 local libbson = ffi.load(ffi.os == "OSX" and "libbson-1.0.dylib" or "libbson-1.0.so")
 
+--from bson-memory.h
+ffi.cdef[[
+
+void  bson_free           (void   *mem);
+
+]]
 
 --from bson-types.h
 ffi.cdef[[
@@ -95,11 +101,17 @@ void
 bson_reinit (bson_t *b);
 
 void
+bson_destroy (bson_t *bson);
+
+void
 bson_copy_to (const bson_t *src,
               bson_t       *dst);
 
 void bson_destroy (bson_t *bson);
 
+char *
+bson_as_json (const bson_t *bson,
+              size_t       *length);
 
 bool
 bson_init_from_json (bson_t        *bson,
@@ -196,4 +208,5 @@ local function test_libbson_cfunction( )
 	libbson.bson_destroy(doc)
 end
 
+return libbson
 
