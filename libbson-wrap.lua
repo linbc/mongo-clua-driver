@@ -144,12 +144,6 @@ bson_append_int32 (bson_t      *bson,
                    int32_t value);
 
 bool
-bson_append_int64 (bson_t      *bson,
-                   const char  *key,
-                   int          key_length,
-                   int64_t value);
-
-bool
 bson_append_oid (bson_t           *bson,
                  const char       *key,
                  int               key_length,
