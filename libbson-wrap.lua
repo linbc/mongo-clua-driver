@@ -107,8 +107,6 @@ void
 bson_copy_to (const bson_t *src,
               bson_t       *dst);
 
-void bson_destroy (bson_t *bson);
-
 char *
 bson_as_json (const bson_t *bson,
               size_t       *length);
