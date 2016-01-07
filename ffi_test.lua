@@ -15,11 +15,13 @@ ffi.C.printf("%d,%s\n",a,'测试字符串')
 local b = ffi.new('int64_t',10)
 print(a == b and 'a == b ' or 'a ~= b', b)
 
+--测试一下各种类型变量
+print('类型测试', type("1"), type(1), type(ffi.new('int',1)), ffi.typeof(ffi.new('int',1)), ffi.typeof(ffi.new('int64_t',1)))
+
 
 ------------------------------------
 --测试ffi垃圾回收调用功能
 --
-
 local function gc_func (p)
     --这个肯定在最新，因为是在垃圾回收的时候执行
     print('gc_func', p[0])
