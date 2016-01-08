@@ -329,3 +329,5 @@ function test_mongo_c_driver( )
 end
 
 test_mongo_c_driver()
+
+return libmongoc

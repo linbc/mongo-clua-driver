@@ -1,10 +1,13 @@
-local ffi = require("ffi")
-local libmongoc = ffi.load(ffi.os == "OSX" and "libmongoc-1.0.dylib" or "libmongoc-1.0.so")
+local libmongoc = require 'libmongoc-wrap'
 
 local cursor_destroy 		= libmongoc.mongoc_cursor_destroy
 local cursor_more			= libmongoc.mongoc_cursor_more
 local cursor_next 			= libmongoc.mongoc_cursor_next
 local cursor_error			= libmongoc.mongoc_cursor_error
+
+local ffi = require 'ffi'
+local ffi_gc = ffi.gc
+local ffi_new = ffi.new
 
 local mongoc_cursor = {}
 
@@ -22,6 +25,12 @@ function mongoc_cursor.new(ptr)
 	if not obj.ptr then
 		error( 'failed mongoc_cursor.new ptr is null\n')
 	end
+	local function gc_func (p)
+	    print('gc_func', p[0])
+	    ffi.free(p)
+	    self:destroy()
+	end
+	self.re = ffi_gc(ffi_new('int[?]',64), gc_func)
 	return setmetatable(obj, meta)
 end
 
@@ -38,7 +47,9 @@ function mongoc_cursor:next(bson)
 end
 
 function mongoc_cursor:error(error)
-	return cursor_error(self.ptr, error)
+	local bson_error_t = ffi.new('bson_error_t')
+	local b = cursor_error(self.ptr, bson_error_t)
+	return b, bson_error_t.message
 end
 
 return mongoc_cursor
