@@ -103,13 +103,13 @@ function mongoc_collection:find(query, fields, skip, limit, batch_size, flags, r
 	return ptr and mongoc_cursor.new(ptr) or nil
 end
 
-function mongoc_collection:insert(flags, document, write_concern)
+function mongoc_collection:insert(document, flags, write_concern)
 	local er = ffi.new('bson_error_t')
 	local b = collection_insert(self.ptr, flags, document, write_concern, er)
 	return b, er.message
 end
 
-function mongoc_collection:update(flags, selector, update, write_concern)
+function mongoc_collection:update(selector, update, flags, write_concern)
 	local er = ffi.new('bson_error_t')
 	local b = collection_update(self.ptr, flags, selector, update, write_concern, er)
 	return b, er.message
@@ -121,7 +121,7 @@ function mongoc_collection:save(document, write_concern)
 	return b, er.message
 end
 
-function mongoc_collection:remove(flags, selector, write_concern)
+function mongoc_collection:remove(selector, flags, write_concern)
 	local er = ffi.new('bson_error_t')
 	local b = collection_remove(self.ptr, flags, selector, write_concern, er)
 	return b, er.message

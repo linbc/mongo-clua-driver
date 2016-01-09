@@ -10,20 +10,23 @@ local function test_mongo_insert( coll )
     time_t time(void*);
   ]]
 
-  local row = ffi.gc(libbson.bson_new(), libbson.bson_destroy)
   for i=1,100 do
-    libbson.bson_reinit(row)
+    local values = {}
+    values.a = 1
+    values.b = '2'
+    values.c = 3.1
+    local the_bson = bson.new()
+    the_bson:write_values(values)
     local name = string.format('linbc%d',i)
-    libbson.bson_append_utf8(row, 'name', string.len('name'), name, string.len(name))
-    libbson.bson_append_int32(row, 'age', string.len('age'), ffi.C.rand()%99)
-
-    coll:insert(0, row, nil, nil)
+    the_bson:append_utf8(row, 'name', string.len('name'), name, string.len(name))
+    the_bson:append_int32(row, 'age', string.len('age'), ffi.C.rand()%99)
+    coll:insert(0, the_bson, nil, nil)
   end
 end
 
 --测试查找
 local function test_mongo_find(coll )
-  local query = ffi.gc(libbson.bson_new(), libbson.bson_destroy)
+  local query = bson.new()
   local cursor = coll:find(query, nil, 0, 0, 0, 0, nil)
 
   local doc = ffi.new('const bson_t*[1]')--ffi.typeof("bson_t *[?]")
@@ -32,8 +35,6 @@ local function test_mongo_find(coll )
     print(ffi.string(cstr))
     libbson.bson_free(cstr)
   end
-
-  local er = ffi.new('bson_error_t[1]')
 end
 
 function test_mongo_c_driver( )
