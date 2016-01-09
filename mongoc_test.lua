@@ -21,14 +21,14 @@ local function test_mongo_insert( coll )
     local name = string.format('linbc%d',i)
     the_bson:append_utf8(row, 'name', string.len('name'), name, string.len(name))
     the_bson:append_int32(row, 'age', string.len('age'), ffi.C.rand()%99)
-    coll:insert(0, the_bson, nil, nil)
+    coll:insert(0, the_bson.ptr, nil, nil)
   end
 end
 
 --测试查找
 local function test_mongo_find(coll )
   local query = bson.new()
-  local cursor = coll:find(query, nil, 0, 0, 0, 0, nil)
+  local cursor = coll:find(query.ptr, nil, 0, 0, 0, 0, nil)
 
   local doc = ffi.new('const bson_t*[1]')--ffi.typeof("bson_t *[?]")
   while cursor:next(doc) do
