@@ -21,7 +21,7 @@ local function test_mongo_insert( coll )
     local name = string.format('linbc%d',i)
     the_bson:append_utf8('name', name)
     the_bson:append_int32('age', ffi.C.rand()%99)
-    coll:insert(0, the_bson.ptr, nil, nil)
+    coll:insert(the_bson.ptr, 0, nil, nil)
   end
 end
 
