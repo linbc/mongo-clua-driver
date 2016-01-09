@@ -1,4 +1,5 @@
 local ffi = require 'ffi'
+local libbson = require 'libbson-wrap'
 local mongoc_client   = require 'mongoc_client'
 
 --测试插入
