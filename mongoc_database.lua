@@ -10,6 +10,9 @@ local ffi = require 'ffi'
 local ffi_gc = ffi.gc
 local ffi_new = ffi.new
 
+local mongoc_collection	= require 'mongoc_collection'
+local mongoc_cursor 	= require 'mongoc_cursor'
+
 local mongoc_database = {}
 
 local meta = {
@@ -27,29 +30,32 @@ function mongoc_database.new(ptr)
 		error( 'failed mongoc_database.new ptr is null\n')
 	end
 	local function gc_func (p)
-	    print('gc_func', p[0])
 	    ffi.free(p)
-	    self:destroy()
+	    obj.destroy(obj)
 	end
-	self.re = ffi_gc(ffi_new('int[?]',64), gc_func)
+	obj.re = ffi_gc(ffi_new('int[?]'), gc_func)
 	return setmetatable(obj, meta)
 end
 
-function mongoc_database:command(flags, skip, limit, batch_size, command, fields, read_prefs)
-	local ptr = database_command(self.ptr, flags, skip, limit, batch_size, command, fields, read_prefs)
+function mongoc_database:command(command, fields, skip, limit, batch_size, flags, read_prefs)
+	local ptr = database_command(self.ptr, flags, skip or 0, limit or 0, batch_size or 0, command, fields, read_prefs)
 	return ptr and mongoc_cursor.new(ptr) or nil
 end
 
-function mongoc_database:command_simple(command, read_prefs, reply)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = database_command_simple(self.ptr, command, read_prefs, reply, bson_error_t)
-	return b, bson_error_t.message
+function mongoc_database:command_simple(command, reply, read_prefs)
+	local er = ffi.new('bson_error_t')
+	local b = database_command_simple(self.ptr, command, read_prefs, reply, er)
+	return b, er.message
 end
 
 function mongoc_database:find_collections(filter)
-	local bson_error_t = ffi.new('bson_error_t')
-	local ptr = database_find_collections(self.ptr, filter, bson_error_t)
-	return ptr and mongoc_cursor.new(ptr) or (nil, bson_error_t.message)
+	local er = ffi.new('bson_error_t')
+	local ptr = database_find_collections(self.ptr, filter, er)
+	if ptr then
+		return mongoc_cursor.new(ptr)
+	else
+		return nil, er.message
+	end
 end
 
 function mongoc_database:get_collection(collection)

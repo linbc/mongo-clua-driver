@@ -14,6 +14,10 @@ local ffi = require 'ffi'
 local ffi_gc = ffi.gc
 local ffi_new = ffi.new
 
+local mongoc_database 	= require 'mongoc_database'
+local mongoc_collection	= require 'mongoc_collection'
+local mongoc_cursor 	= require 'mongoc_cursor'
+
 local mongoc_client = {}
 
 local meta = {
@@ -33,11 +37,10 @@ function mongoc_client.new(authuristr)
 		error( 'failed to parse SCRAM uri\n')
 	end
 	local function gc_func (p)
-	    print('gc_func', p[0])
 	    ffi.free(p)
-	    self:destroy()
+	    obj.destroy(obj)
 	end
-	self.re = ffi_gc(ffi_new('int[?]',64), gc_func)
+	obj.re = ffi_gc(ffi_new('int[?]'), gc_func)
 	return setmetatable(obj, meta)
 end
 
@@ -59,10 +62,14 @@ function mongoc_client:get_database(db_name)
 	return ptr and mongoc_database.new(ptr) or nil
 end
 
-function mongoc_client:find_databases(bson_error)
-	local bson_error_t = ffi.new('bson_error_t')
-	local ptr = client_find_databases(self.ptr, bson_error_t)
-	return ptr and mongoc_cursor.new(ptr) or (nil, bson_error_t.message)
+function mongoc_client:find_databases()
+	local er = ffi.new('bson_error_t')
+	local ptr = client_find_databases(self.ptr, er)
+	if ptr then
+		return mongoc_cursor.new(ptr)
+	else
+		return nil, er.message
+	end
 end
 
 function mongoc_client:get_collection(db_name, collection)
@@ -70,15 +77,19 @@ function mongoc_client:get_collection(db_name, collection)
 	return ptr and mongoc_collection.new(ptr) or nil
 end
 
-function mongoc_client:command(db_name, flags, skip, limit, batch_size, query, fields, read_prefs)
-	local ptr = client_command(self.ptr, db_name, flags, skip, limit, batch_size, query, fields, read_prefs)
+function mongoc_client:command(db_name, query, fields, skip, limit, batch_size, flags, read_prefs)
+	local ptr = client_command(self.ptr, db_name, flags, skip or 0, limit or 0, batch_size or 0, query, fields, read_prefs)
 	return ptr and mongoc_cursor.new(ptr) or nil
 end
 
-function mongoc_client:command_simple(db_name, command, read_prefs, reply)
-	local bson_error_t = ffi.new('bson_error_t')
-	local ptr = client_command_simple(self.ptr, db_name, command, read_prefs, reply, bson_error_t)
-	return ptr and mongoc_cursor.new(ptr) or (nil, bson_error_t.message)
+function mongoc_client:command_simple(db_name, command, reply, read_prefs)
+	local er = ffi.new('bson_error_t')
+	local ptr = client_command_simple(self.ptr, db_name, command, read_prefs, reply, er)
+	if ptr then
+		return mongoc_cursor.new(ptr)
+	else
+		return nil, er.message
+	end
 end
 
 function mongoc_client:destroy()

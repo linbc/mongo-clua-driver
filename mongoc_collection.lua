@@ -22,6 +22,8 @@ local ffi = require 'ffi'
 local ffi_gc = ffi.gc
 local ffi_new = ffi.new
 
+local mongoc_cursor 	= require 'mongoc_cursor'
+
 local mongoc_collection = {}
 
 local meta = {
@@ -39,105 +41,108 @@ function mongoc_collection.new(ptr)
 		error( 'failed mongoc_collection.new ptr is null\n')
 	end
 	local function gc_func (p)
-	    print('gc_func', p[0])
 	    ffi.free(p)
-	    self:destroy()
+	    obj.destroy(obj)
 	end
-	self.re = ffi_gc(ffi_new('int[?]',64), gc_func)
+	obj.re = ffi_gc(ffi_new('int[?]'), gc_func)
 	return setmetatable(obj, meta)
 end
 
-function mongoc_collection:command(flags, skip, limit, batch_size, command, fields, read_prefs)
-	return collection_command(self.ptr, flags, skip, limit, batch_size, command, fields, read_prefs)
+function mongoc_collection:command(command, fields, skip, limit, batch_size, flags, read_prefs)
+	return collection_command(self.ptr, flags, skip or 0, limit or 0, batch_size or 0, command, fields, read_prefs)
 end
 
-function mongoc_collection:command_simple(command, read_prefs, reply)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_command_simple(self.ptr, command, read_prefs, reply, bson_error_t)
-	return b, bson_error_t.message
+function mongoc_collection:command_simple(command, reply, read_prefs)
+	local er = ffi.new('bson_error_t')
+	local b = collection_command_simple(self.ptr, command, read_prefs, reply, er)
+	return b, er.message
 end
 
-function mongoc_collection:count(flags, query, skip, limit, read_prefs)
-	local bson_error_t = ffi.new('bson_error_t')
-	local v = collection_count(self.ptr, flags, query, skip, limit, read_prefs, bson_error_t)
-	return v, bson_error_t.message 
+function mongoc_collection:count(query, skip, limit, flags, read_prefs)
+	local er = ffi.new('bson_error_t')
+	local v = collection_count(self.ptr, flags, query, skip or 0, limit or 0, read_prefs, er)
+	return v, er.message 
 end
 
-function mongoc_collection:count_with_opts(flags, query, skip, limit, opts, read_prefs)
-	local bson_error_t = ffi.new('bson_error_t')
-	local v = collection_count_with_opts(self.ptr, flags, query, skip, limit, opts, read_prefs, bson_error_t)
-	return v, bson_error_t.message
+function mongoc_collection:count_with_opts(query, opts, skip, limit, flags, read_prefs)
+	local er = ffi.new('bson_error_t')
+	local v = collection_count_with_opts(self.ptr, flags, query, skip or 0, limit or 0, opts, read_prefs, er)
+	return v, er.message
 end
 
 function mongoc_collection:drop()
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_drop(self.ptr, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = collection_drop(self.ptr, er)
+	return b, er.message
 end
 
 function mongoc_collection:drop_index(index_name)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_drop_index(self.ptr, index_name, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = collection_drop_index(self.ptr, index_name, er)
+	return b, er.message
 end
 
 function mongoc_collection:create_index(keys, opt)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_create_index(self.ptr, keys, opt, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = collection_create_index(self.ptr, keys, opt, er)
+	return b, er.message
 end
 
 function mongoc_collection:find_indexes()
-	local bson_error_t = ffi.new('bson_error_t')
-	local ptr = collection_find_indexes(self.ptr, bson_error_t)
-	return ptr and mongoc_cursor.new(ptr) or (nil, bson_error_t.message)
+	local er = ffi.new('bson_error_t')
+	local ptr = collection_find_indexes(self.ptr, er)
+	if ptr then
+		return mongoc_cursor.new(ptr)
+	else
+		return nil, er.message
+	end
 end
 
-function mongoc_collection:find(flags, skip, limit, batch_size, query, fields, read_prefs)
-	local ptr = collection_find(self.ptr, flags, skip, limit, batch_size, query, fields, read_prefs)
+function mongoc_collection:find(query, fields, skip, limit, batch_size, flags, read_prefs)
+	local ptr = collection_find(self.ptr, flags, skip or 0, limit or 0, batch_size or 0, query, fields, read_prefs)
 	return ptr and mongoc_cursor.new(ptr) or nil
 end
 
 function mongoc_collection:insert(flags, document, write_concern)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_insert(self.ptr, flags, document, write_concern, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = collection_insert(self.ptr, flags, document, write_concern, er)
+	return b, er.message
 end
 
 function mongoc_collection:update(flags, selector, update, write_concern)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_update(self.ptr, flags, selector, update, write_concern, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = collection_update(self.ptr, flags, selector, update, write_concern, er)
+	return b, er.message
 end
 
 function mongoc_collection:save(document, write_concern)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_save(self.ptr, document, write_concern, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = collection_save(self.ptr, document, write_concern, er)
+	return b, er.message
 end
 
 function mongoc_collection:remove(flags, selector, write_concern)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_remove(self.ptr, flags, selector, write_concern, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = collection_remove(self.ptr, flags, selector, write_concern, er)
+	return b, er.message
 end
 
 function mongoc_collection:rename(new_db, new_name, drop_target_before_rename)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_rename(self.ptr, new_db, new_name, drop_target_before_rename, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = collection_rename(self.ptr, new_db, new_name, drop_target_before_rename, er)
+	return b, er.message
 end
 
 function mongoc_collection:find_and_modify_with_opts(query, opts, reply)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_find_and_modify_with_opts(self.ptr, query, opts, reply, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = collection_find_and_modify_with_opts(self.ptr, query, opts, reply, er)
+	return b, er.message
 end
 
 function mongoc_collection:find_and_modify(query, sort, update, fields, _remove, upsert, _new, reply)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = collection_find_and_modify(self.ptr, query, sort, update, fields, _remove, upsert, _new, reply, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = collection_find_and_modify(self.ptr, query, sort, update, fields, _remove, upsert, _new, reply, er)
+	return b, er.message
 end
 
 function mongoc_collection:destroy()

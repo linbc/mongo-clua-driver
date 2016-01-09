@@ -26,11 +26,10 @@ function mongoc_cursor.new(ptr)
 		error( 'failed mongoc_cursor.new ptr is null\n')
 	end
 	local function gc_func (p)
-	    print('gc_func', p[0])
 	    ffi.free(p)
-	    self:destroy()
+	    obj.destroy(obj)
 	end
-	self.re = ffi_gc(ffi_new('int[?]',64), gc_func)
+	obj.re = ffi_gc(ffi_new('int[?]'), gc_func)
 	return setmetatable(obj, meta)
 end
 
@@ -47,9 +46,9 @@ function mongoc_cursor:next(bson)
 end
 
 function mongoc_cursor:error(error)
-	local bson_error_t = ffi.new('bson_error_t')
-	local b = cursor_error(self.ptr, bson_error_t)
-	return b, bson_error_t.message
+	local er = ffi.new('bson_error_t')
+	local b = cursor_error(self.ptr, er)
+	return b, er.message
 end
 
 return mongoc_cursor
