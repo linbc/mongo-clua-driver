@@ -1,3 +1,4 @@
+local ffi = require 'ffi'
 local mongoc_client   = require 'mongoc_client'
 
 --测试插入

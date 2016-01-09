@@ -14,7 +14,7 @@ local collection_update 					= libmongoc.mongoc_collection_update
 local collection_save 						= libmongoc.mongoc_collection_save
 local collection_remove 					= libmongoc.mongoc_collection_remove
 local collection_rename 					= libmongoc.mongoc_collection_rename
-local collection_find_and_modify_with_opts 	= libmongoc.mongoc_collection_find_and_modify_with_opts
+--local collection_find_and_modify_with_opts 	= libmongoc.mongoc_collection_find_and_modify_with_opts
 local collection_find_and_modify 			= libmongoc.mongoc_collection_find_and_modify
 local collection_destroy 					= libmongoc.mongoc_collection_destroy
 
@@ -133,11 +133,11 @@ function mongoc_collection:rename(new_db, new_name, drop_target_before_rename)
 	return b, er.message
 end
 
-function mongoc_collection:find_and_modify_with_opts(query, opts, reply)
-	local er = ffi.new('bson_error_t')
-	local b = collection_find_and_modify_with_opts(self.ptr, query, opts, reply, er)
-	return b, er.message
-end
+-- function mongoc_collection:find_and_modify_with_opts(query, opts, reply)
+-- 	local er = ffi.new('bson_error_t')
+-- 	local b = collection_find_and_modify_with_opts(self.ptr, query, opts, reply, er)
+-- 	return b, er.message
+-- end
 
 function mongoc_collection:find_and_modify(query, sort, update, fields, _remove, upsert, _new, reply)
 	local er = ffi.new('bson_error_t')
