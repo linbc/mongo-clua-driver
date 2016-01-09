@@ -38,10 +38,10 @@ end
 function test_mongo_c_driver( )
   --参考：http://api.mongodb.org/c/1.3.0/tutorial.html#find
   --日志处理函数
-  local printLog = ffi.cast('mongoc_log_func_t', function ( log_level, log_domain, message, user_data )
-    --print(log_level, ffi.string(log_domain), ffi.string(message))
-  end)
-  libmongoc.mongoc_log_set_handler(printLog,nil)
+  -- local printLog = ffi.cast('mongoc_log_func_t', function ( log_level, log_domain, message, user_data )
+  --   --print(log_level, ffi.string(log_domain), ffi.string(message))
+  -- end)
+  -- libmongoc.mongoc_log_set_handler(printLog,nil)
 
   local authuristr = "mongodb://user,=:pass@127.0.0.1/test?authMechanism=SCRAM-SHA-1"
   mongoc_client:mongoc_init()
@@ -57,7 +57,7 @@ function test_mongo_c_driver( )
   mongoc_client:mongoc_cleanup()
 
   --日志函数记得回收
-  printLog:free()
+  -- printLog:free()
 end
 
 test_mongo_c_driver()
