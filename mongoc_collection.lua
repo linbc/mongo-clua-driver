@@ -44,7 +44,7 @@ function mongoc_collection.new(ptr)
 	    ffi.free(p)
 	    obj.destroy(obj)
 	end
-	obj.re = ffi_gc(ffi_new('int[?]'), gc_func)
+	obj.re = ffi_gc(ffi_new('int[?]', 0), gc_func)
 	return setmetatable(obj, meta)
 end
 
