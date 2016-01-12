@@ -1,6 +1,4 @@
 local ffi = require 'ffi'
-local ffi_gc = ffi.gc
-local ffi_new = ffi.new
 
 local ffi_gc = {}
 
@@ -18,7 +16,7 @@ function ffi_gc.new()
 	    ffi.free(p)
 	    obj.destroy(obj)
 	end
-	obj.re = ffi_gc(ffi_new('int[?]', 0), gc_func)
+	obj.re = ffi.gc(ffi.new('int[?]', 0), gc_func)
 	return setmetatable(obj, meta)
 end
 
