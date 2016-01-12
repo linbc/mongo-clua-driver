@@ -16,7 +16,7 @@ function ffi_gc.new()
 	    ffi.free(p)
 	    obj.destroy(obj)
 	end
-	obj.re = ffi.gc(ffi.new('int[?]', 0), gc_func)
+	obj.re = ffi.gc(ffi.new('int[?]', 1), gc_func)
 	return setmetatable(obj, meta)
 end
 
