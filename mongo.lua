@@ -1,3 +1,4 @@
+local mongoc_client   = require 'mongoc_client'
 
 ---------------------------------------------------
 --client
@@ -16,7 +17,8 @@ local mongo_wrap_meta = {
 
 --@authuristr: 	连接字符串
 function mongo_wrap.new( authuristr )
-	self.client = require('mongoc_client').new(authuristr)
+	mongoc_client:mongoc_init()
+	self.client = mongoc_client.new(authuristr)
 end
 
 --@name: 	库名称
@@ -64,7 +66,7 @@ function mongo_database_wrap:count(db_name, wheres)
 	if collection ~= nil then
 		local the_bson = bson.new()
 		the_bson:write_values(wheres)
-		return collection:count(the_bson)
+		return collection:count(the_bson.ptr)
 	end
 	return 0
 end
@@ -85,14 +87,14 @@ local mongo_collection_wrap_meta = {
 function mongo_collection_wrap:insert(values)
 	local the_bson = bson.new()
 	the_bson:write_values(values)
-	self.collection:insert(the_bson)
+	self.collection:insert(the_bson.ptr)
 end
 
 --@wheres: 	查询的条件
 function mongo_collection_wrap:delete(wheres)
 	local the_bson = bson.new()
 	the_bson:write_values(wheres)
-	self.collection:remove(the_bson)
+	self.collection:remove(the_bson.ptr)
 end
 
 --@wheres: 	查询的条件
@@ -104,7 +106,7 @@ function mongo_collection_wrap:update(wheres, values, flags)
 	local update_bson = bson.new()
 	update_bson:write_values(values)
 	--TODO flags true --如果不存在则变成插入
-	self.collection:update(selector_bson, update_bson, flags)
+	self.collection:update(selector_bson.ptr, update_bson.ptr, flags)
 end
 
 --@wheres: 	查询的条件
@@ -117,7 +119,7 @@ function mongo_collection_wrap:find(wheres, fields, limit, skip)
 	local fields_bson = bson.new()
 	fields_bson:write_values(fields)
 	local cursor_wrap = nil
-	local cursor = self.collection:find(wheres_bson, fields_bson, skip, limit)
+	local cursor = self.collection:find(wheres_bson.ptr, fields_bson.ptr, skip, limit)
 	if cursor ~= nil then
 		cursor_wrap = {}
 		cursor_wrap.cursor = cursor
@@ -129,7 +131,7 @@ end
 --@wheres: 	查询的条件
 --@fields: 	返回的字段 
 function mongo_collection_wrap:findOne(wheres, fields)
-	return self:find(wheres, fields, 1)
+	return self:find(wheres.ptr, fields.ptr, 1)
 end
 
 ---------------------------------------------------
@@ -152,6 +154,8 @@ end
 
 function mongo_cursor_wrap:next()
 	local the_bson = bson.new()
-	self.cursor:next(the_bson)
+	self.cursor:next(the_bson.ptr)
 	return the_bson:read_values()
 end
+
+return mongo_wrap

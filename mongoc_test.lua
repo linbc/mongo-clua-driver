@@ -63,4 +63,45 @@ function test_mongo_c_driver( )
   -- printLog:free()
 end
 
-test_mongo_c_driver()
+--test_mongo_c_driver()
+
+local mongoc_wrap   = require 'mongo'
+
+
+--测试插入
+local function test_mongo_wrap_insert( coll )
+  ffi.cdef[[
+    int rand(void);
+    void srand(unsigned seed);
+    time_t time(void*);
+  ]]
+
+  for i=1,100 do
+    local values = {}
+    values.a = 1
+    values.b = '2'
+    values.c = 3.1
+    local the_bson = bson.new()
+    the_bson:write_values(values)
+    local name = string.format('linbc%d',i)
+    the_bson:append_utf8('name', name)
+    the_bson:append_int32('age', ffi.C.rand()%99)
+    coll:insert(the_bson.ptr)
+  end
+end
+
+function test_mongo_c_driver_wrap( ... )
+  local authuristr = "mongodb://dev:asdf@192.168.30.11:27022/test?authMechanism=SCRAM-SHA-1"
+  local mongoc_wrap = mongoc_wrap.new(authuristr)
+  if not mongoc_wrap then
+    error( 'failed to parse SCRAM uri\n')
+  end
+  local database_wrap = mongoc_wrap:getDB('test')
+  local collection_wrap = database_wrap['test']
+
+  test_mongo_wrap_insert(collection_wrap)
+  mongoc_client:mongoc_cleanup()
+
+end
+
+test_mongo_c_driver_wrap()
