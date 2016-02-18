@@ -328,6 +328,6 @@ function test_mongo_c_driver( )
   printLog:free()
 end
 
-test_mongo_c_driver()
+--test_mongo_c_driver()
 
 return libmongoc
