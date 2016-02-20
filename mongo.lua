@@ -71,7 +71,7 @@ end
 --@name: 	集合名称（表名）
 function mongo_database_wrap:getCollection(name)
 	local collection_wrap = nil
-	local collection = self.database[name]
+	local collection = self.database:get_collection(name)
 	if collection ~= nil then
 		collection_wrap = {}
 		collection_wrap.collection = collection
@@ -80,10 +80,10 @@ function mongo_database_wrap:getCollection(name)
 	return collection_wrap
 end
 
---@db_name: 	查询的表名
+--@name: 		查询的表名
 --@wheres: 		查询的条件
-function mongo_database_wrap:count(db_name, wheres)
-	local collection = self.database[db_name]
+function mongo_database_wrap:count(name, wheres)
+	local collection = self.database:get_collection(name)
 	if collection ~= nil then
 		local the_bson = bson.new()
 		the_bson:write_values(wheres)
