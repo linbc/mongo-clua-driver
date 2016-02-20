@@ -81,11 +81,20 @@ local function test_mongo_wrap_insert( coll )
     values.a = 1
     values.b = '2'
     values.c = 3.1
-   
     values.name = string.format('linbc%d',i)
-
     values.age = ffi.C.rand()%99 
     coll:insert(values)
+  end
+end
+
+--测试查找
+local function test_mongo_wrap_find(coll )
+  local cursor = coll:find(nil, nil, 0, 0, 0, 0, nil)
+  while cursor:hasNext() do
+    local t = cursor:next()
+    for k,v in pairs(r) do
+      print( k,v )
+    end
   end
 end
 
@@ -98,7 +107,8 @@ function test_mongo_c_driver_wrap( ... )
   local database_wrap = mongoc_wrap:getDB('test')
   local collection_wrap = database_wrap['test']
 
-  test_mongo_wrap_insert(collection_wrap)
+  --test_mongo_wrap_insert(collection_wrap)
+  test_mongo_wrap_find(collection_wrap)
   mongoc_client:mongoc_cleanup()
 
 end
