@@ -160,8 +160,9 @@ function mongo_cursor_wrap:hasNext()
 end
 
 function mongo_cursor_wrap:next()
-	local the_bson = bson.new()
-	self.cursor:next(the_bson.ptr)
+	local doc = ffi.new('const bson_t*[1]')
+	self.cursor:next(doc)
+	local the_bson = bson.new(doc[0])
 	return the_bson:read_values()
 end
 
