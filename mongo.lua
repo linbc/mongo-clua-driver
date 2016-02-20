@@ -1,3 +1,4 @@
+local bson = require 'bson'
 local mongoc_client   = require 'mongoc_client'
 
 local mongo_wrap = {}
