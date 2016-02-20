@@ -81,12 +81,11 @@ local function test_mongo_wrap_insert( coll )
     values.a = 1
     values.b = '2'
     values.c = 3.1
-    local the_bson = bson.new()
-    the_bson:write_values(values)
-    local name = string.format('linbc%d',i)
-    the_bson:append_utf8('name', name)
-    the_bson:append_int32('age', ffi.C.rand()%99)
-    coll:insert(the_bson.ptr)
+   
+    values.name = string.format('linbc%d',i)
+
+    values.age = ffi.C.rand()%99 
+    coll:insert(values)
   end
 end
 
