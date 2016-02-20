@@ -1,5 +1,6 @@
 local mongoc_client   = require 'mongoc_client'
 
+local mongo_wrap = {}
 local mongo_wrap_meta = {
 	__index = function(self, key)
 		return rawget(mongo_wrap, key) or self:getDB(key)
@@ -10,6 +11,7 @@ local mongo_wrap_meta = {
     end
 }
 
+local mongo_database_wrap = {}
 local mongo_database_wrap_meta = {
 	__index = function (self, key)
 		return rawget(mongo_database_wrap, key) or self:getCollection(key)
@@ -20,6 +22,7 @@ local mongo_database_wrap_meta = {
     end
 }
 
+local mongo_collection_wrap = {}
 local mongo_collection_wrap_meta = {
 	__index = mongo_collection_wrap,
 	__tostring = function (self)        
@@ -28,6 +31,7 @@ local mongo_collection_wrap_meta = {
     end
 }
 
+local mongo_cursor_wrap = {}
 local mongo_cursor_wrap_meta = {
 	__index = function(self, key)
 		return rawget(mongo_cursor_wrap, key) or self.cursor[key]
@@ -41,12 +45,12 @@ local mongo_cursor_wrap_meta = {
 ---------------------------------------------------
 --client
 ---------------------------------------------------
-local mongo_wrap = {}
-
 --@authuristr: 	连接字符串
 function mongo_wrap.new( authuristr )
 	mongoc_client:mongoc_init()
+    local self = setmetatable({} , mongo_wrap_meta)
 	self.client = mongoc_client.new(authuristr)
+    return self
 end
 
 --@name: 	库名称
@@ -64,8 +68,6 @@ end
 ---------------------------------------------------
 --database
 ---------------------------------------------------
-local mongo_database_wrap = {}
-
 --@name: 	集合名称（表名）
 function mongo_database_wrap:getCollection(name)
 	local collection_wrap = nil
@@ -93,8 +95,6 @@ end
 ---------------------------------------------------
 --collection
 ---------------------------------------------------
-local mongo_collection_wrap = {}
-
 --@values: 	插入的数据
 function mongo_collection_wrap:insert(values)
 	local the_bson = bson.new()
@@ -149,8 +149,6 @@ end
 ---------------------------------------------------
 --cursor
 ---------------------------------------------------
-local mongo_cursor_wrap = {}
-
 function mongo_cursor_wrap:hasNext()
 	return self.cursor:more()
 end
