@@ -1,10 +1,5 @@
 local mongoc_client   = require 'mongoc_client'
 
----------------------------------------------------
---client
----------------------------------------------------
-local mongo_wrap = {}
-
 local mongo_wrap_meta = {
 	__index = function(self, key)
 		return rawget(mongo_wrap, key) or self:getDB(key)
@@ -14,6 +9,39 @@ local mongo_wrap_meta = {
     __gc = function ( self )
     end
 }
+
+local mongo_database_wrap_meta = {
+	__index = function (self, key)
+		return rawget(mongo_database_wrap, key) or self:getCollection(key)
+	end,
+	__tostring = function (self)        
+    end,
+    __gc = function ( self )
+    end
+}
+
+local mongo_collection_wrap_meta = {
+	__index = mongo_collection_wrap,
+	__tostring = function (self)        
+    end,
+    __gc = function ( self )
+    end
+}
+
+local mongo_cursor_wrap_meta = {
+	__index = function(self, key)
+		return rawget(mongo_cursor_wrap, key) or self.cursor[key]
+	end,
+	__tostring = function (self)        
+    end,
+    __gc = function ( self )
+    end
+}
+
+---------------------------------------------------
+--client
+---------------------------------------------------
+local mongo_wrap = {}
 
 --@authuristr: 	连接字符串
 function mongo_wrap.new( authuristr )
@@ -37,15 +65,6 @@ end
 --database
 ---------------------------------------------------
 local mongo_database_wrap = {}
-local mongo_database_wrap_meta = {
-	__index = function (self, key)
-		return rawget(mongo_database_wrap, key) or self:getCollection(key)
-	end,
-	__tostring = function (self)        
-    end,
-    __gc = function ( self )
-    end
-}
 
 --@name: 	集合名称（表名）
 function mongo_database_wrap:getCollection(name)
@@ -75,13 +94,6 @@ end
 --collection
 ---------------------------------------------------
 local mongo_collection_wrap = {}
-local mongo_collection_wrap_meta = {
-	__index = mongo_collection_wrap,
-	__tostring = function (self)        
-    end,
-    __gc = function ( self )
-    end
-}
 
 --@values: 	插入的数据
 function mongo_collection_wrap:insert(values)
@@ -138,15 +150,6 @@ end
 --cursor
 ---------------------------------------------------
 local mongo_cursor_wrap = {}
-local mongo_cursor_wrap_meta = {
-	__index = function(self, key)
-		return rawget(mongo_cursor_wrap, key) or self.cursor[key]
-	end,
-	__tostring = function (self)        
-    end,
-    __gc = function ( self )
-    end
-}
 
 function mongo_cursor_wrap:hasNext()
 	return self.cursor:more()
