@@ -105,7 +105,7 @@ end
 
 function mongoc_collection:insert(document, flags, write_concern)
 	local er = ffi.new('bson_error_t')
-	local b = collection_insert(self.ptr, flags, document, write_concern, er)
+	local b = collection_insert(self.ptr, flags or 0, document, write_concern, er)
 	return b, er.message
 end
 
