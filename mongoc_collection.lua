@@ -49,7 +49,7 @@ function mongoc_collection.new(ptr)
 end
 
 function mongoc_collection:command(command, fields, skip, limit, batch_size, flags, read_prefs)
-	return collection_command(self.ptr, flags, skip or 0, limit or 0, batch_size or 0, command, fields, read_prefs)
+	return collection_command(self.ptr, flags or 0, skip or 0, limit or 0, batch_size or 0, command, fields, read_prefs)
 end
 
 function mongoc_collection:command_simple(command, reply, read_prefs)
@@ -60,13 +60,13 @@ end
 
 function mongoc_collection:count(query, skip, limit, flags, read_prefs)
 	local er = ffi.new('bson_error_t')
-	local v = collection_count(self.ptr, flags, query, skip or 0, limit or 0, read_prefs, er)
+	local v = collection_count(self.ptr, flags or 0, query, skip or 0, limit or 0, read_prefs, er)
 	return v, er.message 
 end
 
 function mongoc_collection:count_with_opts(query, opts, skip, limit, flags, read_prefs)
 	local er = ffi.new('bson_error_t')
-	local v = collection_count_with_opts(self.ptr, flags, query, skip or 0, limit or 0, opts, read_prefs, er)
+	local v = collection_count_with_opts(self.ptr, flags or 0, query, skip or 0, limit or 0, opts, read_prefs, er)
 	return v, er.message
 end
 
@@ -99,7 +99,7 @@ function mongoc_collection:find_indexes()
 end
 
 function mongoc_collection:find(query, fields, skip, limit, batch_size, flags, read_prefs)
-	local ptr = collection_find(self.ptr, flags, skip or 0, limit or 0, batch_size or 0, query, fields, read_prefs)
+	local ptr = collection_find(self.ptr, flags or 0, skip or 0, limit or 0, batch_size or 0, query, fields, read_prefs)
 	return ptr and mongoc_cursor.new(ptr) or nil
 end
 
@@ -111,7 +111,7 @@ end
 
 function mongoc_collection:update(selector, update, flags, write_concern)
 	local er = ffi.new('bson_error_t')
-	local b = collection_update(self.ptr, flags, selector, update, write_concern, er)
+	local b = collection_update(self.ptr, flags or 0, selector, update, write_concern, er)
 	return b, er.message
 end
 
@@ -123,7 +123,7 @@ end
 
 function mongoc_collection:remove(selector, flags, write_concern)
 	local er = ffi.new('bson_error_t')
-	local b = collection_remove(self.ptr, flags, selector, write_concern, er)
+	local b = collection_remove(self.ptr, flags or 0, selector, write_concern, er)
 	return b, er.message
 end
 

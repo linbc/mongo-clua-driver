@@ -38,7 +38,7 @@ function mongoc_database.new(ptr)
 end
 
 function mongoc_database:command(command, fields, skip, limit, batch_size, flags, read_prefs)
-	local ptr = database_command(self.ptr, flags, skip or 0, limit or 0, batch_size or 0, command, fields, read_prefs)
+	local ptr = database_command(self.ptr, flags or 0, skip or 0, limit or 0, batch_size or 0, command, fields, read_prefs)
 	return ptr and mongoc_cursor.new(ptr) or nil
 end
 
