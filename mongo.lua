@@ -45,13 +45,11 @@ local mongo_cursor_wrap_meta = {
 
 --@tb: 	table
 function getBsonPtrByTable( tb )
-	local ptr = nil
+	local the_bson = bson.new()
 	if tb ~= nil then
-		local the_bson = bson.new()
 		the_bson:write_values(tb)
-		ptr = the_bson.ptr
 	end
-	return ptr
+	return the_bson.ptr
 end
 
 ---------------------------------------------------
