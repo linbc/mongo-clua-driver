@@ -43,6 +43,17 @@ local mongo_cursor_wrap_meta = {
     end
 }
 
+--@tb: 	table
+function getBsonPtrByTable( tb )
+	local ptr = nil
+	if tb ~= nil then
+		local the_bson = bson.new()
+		the_bson:write_values(tb)
+		ptr = the_bson.ptr
+	end
+	return ptr
+end
+
 ---------------------------------------------------
 --client
 ---------------------------------------------------
@@ -86,9 +97,7 @@ end
 function mongo_database_wrap:count(name, wheres)
 	local collection = self.database:get_collection(name)
 	if collection ~= nil then
-		local the_bson = bson.new()
-		the_bson:write_values(wheres)
-		return collection:count(the_bson.ptr)
+		return collection:count(getBsonPtrByTable(wheres))
 	end
 	return 0
 end
@@ -127,12 +136,8 @@ end
 --@limit: 	返回记录数 
 --@skip: 	返回记录开始索引
 function mongo_collection_wrap:find(wheres, fields, limit, skip)
-	local wheres_bson = bson.new()
-	wheres_bson:write_values(wheres)
-	local fields_bson = bson.new()
-	fields_bson:write_values(fields)
 	local cursor_wrap = nil
-	local cursor = self.collection:find(wheres_bson.ptr, fields_bson.ptr, skip, limit)
+	local cursor = self.collection:find(getBsonPtrByTable(wheres), getBsonPtrByTable(fields), skip, limit)
 	if cursor ~= nil then
 		cursor_wrap = {}
 		cursor_wrap.cursor = cursor
@@ -144,7 +149,7 @@ end
 --@wheres: 	查询的条件
 --@fields: 	返回的字段 
 function mongo_collection_wrap:findOne(wheres, fields)
-	return self:find(wheres.ptr, fields.ptr, 1)
+	return self:find(wheres, fields, 1)
 end
 
 ---------------------------------------------------
