@@ -1,3 +1,7 @@
+local ffi = require 'ffi'
+local ffi_gc = ffi.gc
+local ffi_new = ffi.new
+
 local bson = require 'bson'
 local mongoc_client   = require 'mongoc_client'
 
@@ -45,13 +49,11 @@ local mongo_cursor_wrap_meta = {
 
 --@tb: 	table
 function getBsonPtrByTable( tb )
-	local ptr = nil
+	local the_bson = bson.new()
 	if tb ~= nil then
-		local the_bson = bson.new()
 		the_bson:write_values(tb)
-		ptr = the_bson.ptr
 	end
-	return ptr
+	return the_bson.ptr
 end
 
 ---------------------------------------------------
@@ -160,7 +162,7 @@ function mongo_cursor_wrap:hasNext()
 end
 
 function mongo_cursor_wrap:next()
-	local doc = ffi.new('const bson_t*[1]')
+	local doc = ffi_new('const bson_t*[1]')
 	self.cursor:next(doc)
 	local the_bson = bson.new(doc[0])
 	return the_bson:read_values()
