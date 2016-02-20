@@ -309,6 +309,7 @@ function test_mongo_c_driver( )
   libmongoc.mongoc_log_set_handler(printLog,nil)
 
   local authuristr = "mongodb://user,=:pass@127.0.0.1/test?authMechanism=SCRAM-SHA-1"
+  --local authuristr = "mongodb://dev:asdf@192.168.30.11:27022/test?authMechanism=SCRAM-SHA-1"
   libmongoc.mongoc_init()
   local  client = libmongoc.mongoc_client_new(authuristr)
   if not client then
@@ -328,6 +329,6 @@ function test_mongo_c_driver( )
   printLog:free()
 end
 
-test_mongo_c_driver()
+--test_mongo_c_driver()
 
 return libmongoc

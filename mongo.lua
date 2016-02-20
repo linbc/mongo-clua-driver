@@ -46,7 +46,9 @@ local mongo_wrap = {}
 --@authuristr: 	连接字符串
 function mongo_wrap.new( authuristr )
 	mongoc_client:mongoc_init()
+    local self = setmetatable({} , mongo_wrap_meta)
 	self.client = mongoc_client.new(authuristr)
+    return self
 end
 
 --@name: 	库名称
