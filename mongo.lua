@@ -162,13 +162,15 @@ mongo_wrap.__end = false
 mongo_wrap.__next = nil
 
 function mongo_cursor_wrap:hasNext()
-	if self.__next ~= nil and not self.__end then
+    if not self.__next and not self.__end then
 		local doc = ffi_new('const bson_t*[1]')
-		self.__end = self.cursor:next(doc)
-		local the_bson = bson.new(doc[0])
-		self.__next = the_bson:read_values()
+		self.__end = not self.cursor:next(doc)
+		if not self.__end then
+            local the_bson = bson.new(doc[0])
+		    self.__next = the_bson:read_values()
+        end
 	end
-	return self.__next ~= nil
+    return self.__next ~= nil
 end
 
 function mongo_cursor_wrap:next()

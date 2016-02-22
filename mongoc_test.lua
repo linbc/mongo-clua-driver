@@ -76,7 +76,7 @@ local function test_mongo_wrap_insert( coll )
     time_t time(void*);
   ]]
 
-  for i=1,100 do
+  for i=1,10 do
     local values = {}
     values.a = 1
     values.b = '2'
@@ -89,13 +89,30 @@ end
 
 --测试查找
 local function test_mongo_wrap_find(coll )
-  local cursor = coll:find(nil, nil, 0, 0, 0, 0, nil)
-  while cursor:hasNext() do
-    local t = cursor:next()
-    for k,v in pairs(r) do
-      print( k,v )
+    local cursor = coll:find(nil, nil, 0, 0, 0, 0, nil)
+    function f0()
+        local doc = ffi.new('const bson_t*[1]')--ffi.typeof("bson_t *[?]")
+        local b = cursor.cursor:next(doc)
+        print(b)
+        while b do
+            b = cursor.cursor:next(doc)
+            print(b)
+            local cstr = libbson.bson_as_json(doc[0], nil)
+            print(ffi.string(cstr))
+            libbson.bson_free(cstr)
+        end
     end
-  end
+    function f1()
+        local b = cursor:hasNext()
+        while b do
+            local t = cursor:next()
+            for k,v in pairs(t) do
+                print( k,v )
+            end
+            b = cursor:hasNext()
+        end
+    end
+    f1()
 end
 
 function test_mongo_c_driver_wrap( ... )
