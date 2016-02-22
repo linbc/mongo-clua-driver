@@ -161,6 +161,12 @@ bson_append_time_t (bson_t     *bson,
                     time_t      value);                                                    
 ]]
 
+--from bson-oid.h
+ffi.cdef[[
+void     
+bson_oid_to_string (const bson_oid_t  *oid,
+                    char              str[25]); 
+]]
 
 local function test_libbson_cfunction( )
 	--构造一个bson对象{a:1, b:-1, c:0.1, d:"linbc"}

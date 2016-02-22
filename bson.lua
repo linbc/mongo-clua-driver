@@ -25,7 +25,9 @@ local bson_iter_double = libbson.bson_iter_double
 local bson_iter_utf8 = libbson.bson_iter_utf8
 local bson_iter_int32 = libbson.bson_iter_int32
 local bson_iter_int64 = libbson.bson_iter_int64
+local bson_iter_oid = libbson.bson_iter_oid
 
+local bson_oid_to_string = libbson.bson_oid_to_string
 
 local bson = {}
 
@@ -118,8 +120,11 @@ function bson:get_value_by_iter( iter )
 		return bson_iter_int32(iter)
 	elseif t == libbson.BSON_TYPE_INT64 then
 		return bson_iter_int64(iter)
-	--elseif t == libbson.BSON_TYPE_OID then
-	--	return = bson_iter_int64(iter)
+	elseif t == libbson.BSON_TYPE_OID then
+		local oid = bson_iter_oid(iter)
+		local str = ffi_new("char[25]")
+		bson_oid_to_string(oid, str)
+		return ffi.string(str)
 	else
 		--TODO:未支持的类型在这里加一下
 		error('does not support:',key,	t)
