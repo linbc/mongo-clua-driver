@@ -105,28 +105,34 @@ function bson:append_value( key, value )
 	error(string.format('does not support: %s,%s,%s',typ, key, tonumber(value)))
 end
 
+--获取bson_iter的value值
+function bson:get_value_by_iter( iter )
+	local t = bson_iter_type(iter)
+	if t == libbson.BSON_TYPE_DOUBLE then
+		return bson_iter_double(iter)
+	elseif t == libbson.BSON_TYPE_UTF8 then
+		local buflen = ffi.gc( ffi.new("uint32_t[1]", 1), ffi.free)
+		local utf8 = bson_iter_utf8(iter, buflen)
+		return ffi.string(utf8)
+	elseif t == libbson.BSON_TYPE_INT32 then
+		return bson_iter_int32(iter)
+	elseif t == libbson.BSON_TYPE_INT64 then
+		return bson_iter_int64(iter)
+	--elseif t == libbson.BSON_TYPE_OID then
+	--	return = bson_iter_int64(iter)
+	else
+		--TODO:未支持的类型在这里加一下
+		error('does not support:',key,	t)
+	end
+end
+
 --传入key直接返回值,如果为空则返回nil
 function bson:read_value( key )
 	local iter = ffi.gc( ffi.new('bson_iter_t'), ffi.free)
 	bson_iter_init (iter, assert(self.ptr))
 	while bson_iter_next(iter) do
 		if ffi.string( bson_iter_key(iter) )== key then
-
-			local t = bson_iter_type(iter)
-			if t == libbson.BSON_TYPE_DOUBLE then
-				return bson_iter_double(iter)
-			elseif t == libbson.BSON_TYPE_UTF8 then
-				local buflen = ffi.gc( ffi.new("uint32_t[1]", 1), ffi.free)
-				local utf8 = bson_iter_utf8(iter, buflen)
-				return ffi.string(utf8)
-			elseif t == libbson.BSON_TYPE_INT32 then
-				return bson_iter_int32(iter)
-			elseif t == libbson.BSON_TYPE_INT64 then
-				return bson_iter_int64(iter)
-			else
-				--TODO:未支持的类型在这里加一下
-				error('does not support:',key,	t)
-			end
+			return self:get_value_by_iter(iter)
 		end
 	end
 end
@@ -138,23 +144,7 @@ function bson:read_values( )
 	local values = {}
 	while bson_iter_next(iter) do
 		local k = ffi.string( bson_iter_key(iter) )
-		local t = bson_iter_type(iter)
-		local v = nil
-		if t == libbson.BSON_TYPE_DOUBLE then
-			v = bson_iter_double(iter)
-		elseif t == libbson.BSON_TYPE_UTF8 then
-			local buflen = ffi.gc( ffi.new("uint32_t[1]", 1), ffi.free)
-			local utf8 = bson_iter_utf8(iter, buflen)
-			v = ffi.string(utf8)
-		elseif t == libbson.BSON_TYPE_INT32 then
-			v = bson_iter_int32(iter)
-		elseif t == libbson.BSON_TYPE_INT64 then
-			v = bson_iter_int64(iter)
-		else
-			--TODO:未支持的类型在这里加一下
-			error('does not support:',key,	t)
-		end
-		values[k] = v
+		values[k] = self:get_value_by_iter(iter)
 	end
 	return values
 end
