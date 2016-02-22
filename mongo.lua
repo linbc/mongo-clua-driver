@@ -154,18 +154,30 @@ function mongo_collection_wrap:findOne(wheres, fields)
 	return self:find(wheres, fields, 1)
 end
 
+
 ---------------------------------------------------
 --cursor
 ---------------------------------------------------
+mongo_wrap.__end = false
+mongo_wrap.__next = nil
+
 function mongo_cursor_wrap:hasNext()
-	return self.cursor:more()
+	if self.__next ~= nil and not self.__end then
+		local doc = ffi_new('const bson_t*[1]')
+		self.__end = self.cursor:next(doc)
+		local the_bson = bson.new(doc[0])
+		self.__next = the_bson:read_values()
+	end
+	return self.__next ~= nil
 end
 
 function mongo_cursor_wrap:next()
-	local doc = ffi_new('const bson_t*[1]')
-	self.cursor:next(doc)
-	local the_bson = bson.new(doc[0])
-	return the_bson:read_values()
+	if self.__next == nil then
+		self:hasNext()
+	end
+	local r = self.__next
+	self.__next = nil
+	return r
 end
 
 return mongo_wrap
