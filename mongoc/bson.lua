@@ -1,5 +1,5 @@
 
-local libbson = require 'libbson-wrap'
+local libbson = require 'mongoc.libbson-wrap'
 
 local ffi = require 'ffi'
 local ffi_gc = ffi.gc

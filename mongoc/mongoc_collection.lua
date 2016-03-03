@@ -1,4 +1,4 @@
-local libmongoc = require 'libmongoc-wrap'
+local libmongoc = require 'mongoc.libmongoc-wrap'
 
 local collection_command 					= libmongoc.mongoc_collection_command
 local collection_command_simple				= libmongoc.mongoc_collection_command_simple

@@ -1,4 +1,4 @@
-local libmongoc = require 'libmongoc-wrap'
+local libmongoc = require 'mongoc.libmongoc-wrap'
 
 local mongoc_init 			= libmongoc.mongoc_init
 local mongoc_cleanup 		= libmongoc.mongoc_cleanup

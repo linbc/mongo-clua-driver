@@ -1,4 +1,4 @@
-local libmongoc = require 'libmongoc-wrap'
+local libmongoc = require 'mongoc.libmongoc-wrap'
 
 local cursor_destroy 		= libmongoc.mongoc_cursor_destroy
 local cursor_more			= libmongoc.mongoc_cursor_more

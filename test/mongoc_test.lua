@@ -1,7 +1,7 @@
 package.path = package.path..';../*.lua'
 local ffi = require 'ffi'
-local bson = require 'bson'
-local libbson = require 'libbson-wrap'
+local bson = require 'mongoc.bson'
+local libbson = require 'mongoc.libbson-wrap'
 local mongoc_client   = require 'mongoc.mongoc_client'
 
 --测试插入
