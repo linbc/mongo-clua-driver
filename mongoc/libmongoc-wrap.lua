@@ -1,7 +1,7 @@
 local ffi = require("ffi")
 local libmongoc = ffi.load(ffi.os == "OSX" and "libmongoc-1.0.dylib" or "libmongoc-1.0.so")
 
-local libbson = require "libbson-wrap"
+local libbson = require "mongoc.libbson-wrap"
 
 --from...
 ffi.cdef[[

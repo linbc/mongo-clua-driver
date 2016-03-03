@@ -2,7 +2,7 @@ local ffi = require 'ffi'
 local ffi_gc = ffi.gc
 local ffi_new = ffi.new
 
-local bson = require 'mogoc.bson'
+local bson = require 'mongoc.bson'
 local mongoc_client   = require 'mongoc.mongoc_client'
 
 local mongo_wrap = {}
