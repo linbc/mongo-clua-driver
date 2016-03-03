@@ -14,9 +14,9 @@ local ffi = require 'ffi'
 local ffi_gc = ffi.gc
 local ffi_new = ffi.new
 
-local mongoc_database 	= require 'mongoc_database'
-local mongoc_collection	= require 'mongoc_collection'
-local mongoc_cursor 	= require 'mongoc_cursor'
+local mongoc_database 	= require 'mongoc.mongoc_database'
+local mongoc_collection	= require 'mongoc.mongoc_collection'
+local mongoc_cursor 	= require 'mongoc.mongoc_cursor'
 
 local mongoc_client = {}
 

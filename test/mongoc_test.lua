@@ -1,7 +1,8 @@
+package.path = package.path..';../*.lua'
 local ffi = require 'ffi'
 local bson = require 'bson'
 local libbson = require 'libbson-wrap'
-local mongoc_client   = require 'mongoc_client'
+local mongoc_client   = require 'mongoc.mongoc_client'
 
 --测试插入
 local function test_mongo_insert( coll )
@@ -65,7 +66,7 @@ end
 
 --test_mongo_c_driver()
 
-local mongoc_wrap   = require 'mongo'
+local mongoc_wrap   = require 'mongoc.mongo'
 
 
 --测试插入

@@ -22,7 +22,7 @@ local ffi = require 'ffi'
 local ffi_gc = ffi.gc
 local ffi_new = ffi.new
 
-local mongoc_cursor 	= require 'mongoc_cursor'
+local mongoc_cursor 	= require 'mongoc.mongoc_cursor'
 
 local mongoc_collection = {}
 
