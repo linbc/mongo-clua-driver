@@ -1,5 +1,7 @@
 local ffi = require("ffi")
-local libbson = ffi.load(ffi.os == "OSX" and "libbson-1.0.dylib" or "libbson-1.0.so")
+local ffi_load = require("mongoc.ffi_load").load
+--local libbson = ffi.load(ffi.os == "OSX" and "libbson-1.0.dylib" or "libbson-1.0.so")
+local libbson = ffi_load('libbson-1.0')
 
 --from bson-memory.h
 ffi.cdef[[

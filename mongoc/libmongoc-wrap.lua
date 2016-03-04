@@ -1,5 +1,7 @@
 local ffi = require("ffi")
-local libmongoc = ffi.load(ffi.os == "OSX" and "libmongoc-1.0.dylib" or "libmongoc-1.0.so")
+--local libmongoc = ffi.load(ffi.os == "OSX" and "libmongoc-1.0.dylib" or "libmongoc-1.0.so")
+local ffi_load = require("mongoc.ffi_load").load
+local libmongoc = ffi_load("libmongoc-1.0")
 
 local libbson = require "mongoc.libbson-wrap"
 

@@ -1,4 +1,4 @@
-package.path = package.path..';../*.lua'
+package.path = package.path..';../?.lua;/opt/openresty/lualib/?.so'
 local ffi = require 'ffi'
 local bson = require 'mongoc.bson'
 local libbson = require 'mongoc.libbson-wrap'
