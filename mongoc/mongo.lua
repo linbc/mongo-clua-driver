@@ -123,8 +123,10 @@ end
 
 --@wheres: 	查询的条件
 --@values: 	更新的数据
---@flags: 	
-function mongo_collection_wrap:update(wheres, values, flags)
+--@upsert: 	如果不存在则插入
+--@multi:   更新多条数据
+function mongo_collection_wrap:update(wheres, values, upsert, multi )
+    local flags = (upsert and 1 or 0) + (multi and 2 or 0)
 	local selector_bson = bson.new()
 	selector_bson:write_values(wheres)
 	local update_bson = bson.new()
