@@ -63,7 +63,7 @@ function mongoc_client:get_database(db_name)
 end
 
 function mongoc_client:find_databases()
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local ptr = client_find_databases(self.ptr, er)
 	if ptr then
 		return mongoc_cursor.new(ptr)
@@ -83,7 +83,7 @@ function mongoc_client:command(db_name, query, fields, skip, limit, batch_size, 
 end
 
 function mongoc_client:command_simple(db_name, command, reply, read_prefs)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local ptr = client_command_simple(self.ptr, db_name, command, read_prefs, reply, er)
 	if ptr then
 		return mongoc_cursor.new(ptr)

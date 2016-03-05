@@ -46,7 +46,7 @@ function mongoc_cursor:next(bson)
 end
 
 function mongoc_cursor:error(error)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = cursor_error(self.ptr, er)
 	return b, er.message
 end
