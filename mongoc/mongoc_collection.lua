@@ -53,43 +53,43 @@ function mongoc_collection:command(command, fields, skip, limit, batch_size, fla
 end
 
 function mongoc_collection:command_simple(command, reply, read_prefs)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = collection_command_simple(self.ptr, command, read_prefs, reply, er)
 	return b, er.message
 end
 
 function mongoc_collection:count(query, skip, limit, flags, read_prefs)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local v = collection_count(self.ptr, flags or 0, query, skip or 0, limit or 0, read_prefs, er)
 	return v, er.message 
 end
 
 function mongoc_collection:count_with_opts(query, opts, skip, limit, flags, read_prefs)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local v = collection_count_with_opts(self.ptr, flags or 0, query, skip or 0, limit or 0, opts, read_prefs, er)
 	return v, er.message
 end
 
 function mongoc_collection:drop()
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = collection_drop(self.ptr, er)
 	return b, er.message
 end
 
 function mongoc_collection:drop_index(index_name)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = collection_drop_index(self.ptr, index_name, er)
 	return b, er.message
 end
 
 function mongoc_collection:create_index(keys, opt)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = collection_create_index(self.ptr, keys, opt, er)
 	return b, er.message
 end
 
 function mongoc_collection:find_indexes()
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local ptr = collection_find_indexes(self.ptr, er)
 	if ptr then
 		return mongoc_cursor.new(ptr)
@@ -104,43 +104,43 @@ function mongoc_collection:find(query, fields, skip, limit, batch_size, flags, r
 end
 
 function mongoc_collection:insert(document, flags, write_concern)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = collection_insert(self.ptr, flags or 0, document, write_concern, er)
 	return b, er.message
 end
 
 function mongoc_collection:update(selector, update, flags, write_concern)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = collection_update(self.ptr, flags or 0, selector, update, write_concern, er)
 	return b, er.message
 end
 
 function mongoc_collection:save(document, write_concern)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = collection_save(self.ptr, document, write_concern, er)
 	return b, er.message
 end
 
 function mongoc_collection:remove(selector, flags, write_concern)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = collection_remove(self.ptr, flags or 0, selector, write_concern, er)
 	return b, er.message
 end
 
 function mongoc_collection:rename(new_db, new_name, drop_target_before_rename)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = collection_rename(self.ptr, new_db, new_name, drop_target_before_rename, er)
 	return b, er.message
 end
 
 -- function mongoc_collection:find_and_modify_with_opts(query, opts, reply)
--- 	local er = ffi.new('bson_error_t')
+-- 	local er = ffi_new('bson_error_t')
 -- 	local b = collection_find_and_modify_with_opts(self.ptr, query, opts, reply, er)
 -- 	return b, er.message
 -- end
 
 function mongoc_collection:find_and_modify(query, sort, update, fields, _remove, upsert, _new, reply)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = collection_find_and_modify(self.ptr, query, sort, update, fields, _remove, upsert, _new, reply, er)
 	return b, er.message
 end

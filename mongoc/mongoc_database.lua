@@ -43,13 +43,13 @@ function mongoc_database:command(command, fields, skip, limit, batch_size, flags
 end
 
 function mongoc_database:command_simple(command, reply, read_prefs)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local b = database_command_simple(self.ptr, command, read_prefs, reply, er)
 	return b, er.message
 end
 
 function mongoc_database:find_collections(filter)
-	local er = ffi.new('bson_error_t')
+	local er = ffi_new('bson_error_t')
 	local ptr = database_find_collections(self.ptr, filter, er)
 	if ptr then
 		return mongoc_cursor.new(ptr)
