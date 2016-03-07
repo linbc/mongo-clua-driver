@@ -28,7 +28,32 @@ local meta = {
     end
 }
 
+-- 生成连接字符串
+local function exchangeDBString( auth_info )
+    local host = auth_info.host
+    local port = auth_info.port
+    local user = auth_info.user
+    local pwd = auth_info.pwd
+    local db = auth_info.db or "admin"
+    local new_str = "mongodb://"
+    if user ~= '' and pwd ~= '' then
+        new_str = new_str..user..":"..pwd.."@"
+    end
+	new_str = new_str..host
+    if port ~= '' then
+         new_str = new_str..":"..port
+    end
+    new_str=new_str.."/"..db.."?authMechanism=SCRAM-SHA-1"
+    return new_str
+end
+
+-- 如：mongoc_client.new({host = "192.168.30.11, port = "27022", user = "a", pwd = "1"})
+-- 或mongoc_client.new("mongodb://dev:asdf@192.168.30.11:27022/test?authMechanism=SCRAM-SHA-1")
 function mongoc_client.new(authuristr)
+	if type(authuristr) == "table" then
+		-- 生成连接字符串
+		authuristr = exchangeDBString(authuristr)
+	end
 	local obj = {}
 	if authuristr then
 		obj.ptr = client_new(authuristr)

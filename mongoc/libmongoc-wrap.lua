@@ -10,7 +10,7 @@ ffi.cdef[[
 
 typedef struct _mongoc_index_opt_t mongoc_index_opt_t;
 typedef struct _mongoc_write_concern_t mongoc_write_concern_t;
-typedef struct _mongoc_update_flags_t mongoc_update_flags_t;
+//typedef struct _mongoc_update_flags_t mongoc_update_flags_t;
 typedef struct _mongoc_remove_flags_t mongoc_remove_flags_t;
 typedef struct _mongoc_find_and_modify_opts_t mongoc_find_and_modify_opts_t;
 typedef struct _mongoc_database_t mongoc_database_t;
@@ -166,7 +166,7 @@ bool                          mongoc_collection_insert               (mongoc_col
                                                                       const mongoc_write_concern_t  *write_concern,
                                                                       bson_error_t                  *error);
 bool                          mongoc_collection_update               (mongoc_collection_t           *collection,
-                                                                      mongoc_update_flags_t          flags,
+                                                                      int                           flags,
                                                                       const bson_t                  *selector,
                                                                       const bson_t                  *update,
                                                                       const mongoc_write_concern_t  *write_concern,

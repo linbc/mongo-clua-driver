@@ -16,6 +16,7 @@ local bson_append_null = libbson.bson_append_null
 local bson_append_int32 = libbson.bson_append_int32
 local bson_append_oid = libbson.bson_append_oid
 local bson_append_utf8 = libbson.bson_append_utf8
+local bson_append_document = libbson.bson_append_document
 
 local bson_iter_init = libbson.bson_iter_init
 local bson_iter_next = libbson.bson_iter_next
@@ -26,6 +27,8 @@ local bson_iter_utf8 = libbson.bson_iter_utf8
 local bson_iter_int32 = libbson.bson_iter_int32
 local bson_iter_int64 = libbson.bson_iter_int64
 local bson_iter_oid = libbson.bson_iter_oid
+local bson_iter_document = libbson.bson_iter_document
+local bson_init_static = libbson.bson_init_static
 
 local bson_oid_to_string = libbson.bson_oid_to_string
 
@@ -43,7 +46,7 @@ function bson.new( ptr )
 	local obj = {}
 	obj.ptr = ptr
 	if not ptr then
-		obj.ptr = ffi.gc( bson_new(), bson_destroy)
+		obj.ptr = ffi_gc( bson_new(), bson_destroy)
 	end
 	return setmetatable(obj, bson_meta)
 end
@@ -72,6 +75,11 @@ function bson:append_utf8( key, value )
 	return bson_append_utf8(self.ptr, key, string.len(key), value, string.len(value))
 end
 
+function bson:append_document( key, value )
+	--assert(type(value) == 'table')
+	return bson_append_document(self.ptr, key, string.len(key), value)
+end
+
 --从一个lua_number中生成cdata类型
 function bson:new_cdata_number( luaNumber )
 	local a = ffi_new('int32_t',luaNumber)
@@ -94,6 +102,10 @@ function bson:append_value( key, value )
 	    else
 	    	return self:append_double(key, b)
 	    end
+	elseif typ == 'table' then
+		local the_bson = bson.new()
+		the_bson:write_values(value)
+		return self:append_document(key, the_bson.ptr)
 	elseif typ == 'cdata' then
 		local typ2 = tostring(ffi.typeof(value))
 		if typ2 == 'ctype<int>' then
@@ -113,7 +125,7 @@ function bson:get_value_by_iter( iter )
 	if t == libbson.BSON_TYPE_DOUBLE then
 		return bson_iter_double(iter)
 	elseif t == libbson.BSON_TYPE_UTF8 then
-		local buflen = ffi.gc( ffi.new("uint32_t[1]", 1), ffi.free)
+		local buflen = ffi_gc( ffi.new("uint32_t[1]", 1), ffi.free)
 		local utf8 = bson_iter_utf8(iter, buflen)
 		return ffi.string(utf8)
 	elseif t == libbson.BSON_TYPE_INT32 then
@@ -125,6 +137,13 @@ function bson:get_value_by_iter( iter )
 		local str = ffi_new("char[25]")
 		bson_oid_to_string(oid, str)
 		return ffi.string(str)
+	elseif t == libbson.BSON_TYPE_DOCUMENT then
+		local document_len = ffi_gc( ffi.new("uint32_t[1]", 1), ffi.free)
+		local document = ffi_gc( ffi.new("const uint8_t*[1]"), ffi.free)
+		bson_iter_document(iter, document_len, document)
+		local the_bson = bson.new()
+		bson_init_static(the_bson.ptr, document[0], document_len[0])
+		return the_bson:read_values()
 	else
 		--TODO:未支持的类型在这里加一下
 		error('does not support:',key,	t)
@@ -133,7 +152,7 @@ end
 
 --传入key直接返回值,如果为空则返回nil
 function bson:read_value( key )
-	local iter = ffi.gc( ffi.new('bson_iter_t'), ffi.free)
+	local iter = ffi_gc( ffi.new('bson_iter_t'), ffi.free)
 	bson_iter_init (iter, assert(self.ptr))
 	while bson_iter_next(iter) do
 		if ffi.string( bson_iter_key(iter) )== key then
@@ -143,7 +162,7 @@ function bson:read_value( key )
 end
 
 function bson:read_values( )
-	local iter = ffi.gc( ffi.new('bson_iter_t'), ffi.free)
+	local iter = ffi_gc( ffi.new('bson_iter_t'), ffi.free)
 	bson_iter_init (iter, assert(self.ptr))
 
 	local values = {}

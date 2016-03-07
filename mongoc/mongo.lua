@@ -109,16 +109,12 @@ end
 ---------------------------------------------------
 --@values: 	插入的数据
 function mongo_collection_wrap:insert(values)
-	local the_bson = bson.new()
-	the_bson:write_values(values)
-	self.collection:insert(the_bson.ptr)
+	self.collection:insert(getBsonPtrByTable(values))
 end
 
 --@wheres: 	查询的条件
 function mongo_collection_wrap:delete(wheres)
-	local the_bson = bson.new()
-	the_bson:write_values(wheres)
-	self.collection:remove(the_bson.ptr)
+	self.collection:remove(getBsonPtrByTable(wheres))
 end
 
 --@wheres: 	查询的条件
@@ -127,12 +123,8 @@ end
 --@multi:   更新多条数据
 function mongo_collection_wrap:update(wheres, values, upsert, multi )
     local flags = (upsert and 1 or 0) + (multi and 2 or 0)
-	local selector_bson = bson.new()
-	selector_bson:write_values(wheres)
-	local update_bson = bson.new()
-	update_bson:write_values(values)
 	--TODO flags true --如果不存在则变成插入
-	self.collection:update(selector_bson.ptr, update_bson.ptr, flags)
+	self.collection:update(getBsonPtrByTable(wheres), getBsonPtrByTable(values), flags)
 end
 
 --@wheres: 	查询的条件

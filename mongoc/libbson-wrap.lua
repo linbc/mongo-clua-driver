@@ -91,6 +91,15 @@ bson_iter_bool (const bson_iter_t *iter);
 bson_type_t
 bson_iter_type (const bson_iter_t *iter);
 
+void
+bson_iter_document (const bson_iter_t   *iter,
+                    uint32_t            *document_len,
+                    const uint8_t      **document);
+					
+bool
+bson_init_static (bson_t        *b,
+                  const uint8_t *data,
+                  size_t         length);
 ]]
 
 --from bson.h
@@ -160,7 +169,13 @@ bool
 bson_append_time_t (bson_t     *bson,
                     const char *key,
                     int         key_length,
-                    time_t      value);                                                    
+                    time_t      value); 
+					
+bool
+bson_append_document (bson_t       *bson,       
+                      const char   *key,        
+                      int           key_length, 
+                      const bson_t *value);  				
 ]]
 
 --from bson-oid.h
@@ -171,6 +186,7 @@ bson_oid_to_string (const bson_oid_t  *oid,
 ]]
 
 local function test_libbson_cfunction( )
+	package.path = package.path..';../?.lua;/opt/openresty/lualib/?.so'
 	--构造一个bson对象{a:1, b:-1, c:0.1, d:"linbc"}
 	local doc = libbson.bson_new()
 

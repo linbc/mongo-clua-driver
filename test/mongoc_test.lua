@@ -48,7 +48,6 @@ function test_mongo_c_driver( )
   -- libmongoc.mongoc_log_set_handler(printLog,nil)
 
   local authuristr = "mongodb://dev:asdf@192.168.30.11:27022/test?authMechanism=SCRAM-SHA-1"
-  mongoc_client:mongoc_init()
   local  client = mongoc_client.new(authuristr)
   if not client then
     error( 'failed to parse SCRAM uri\n')
@@ -79,7 +78,7 @@ local function test_mongo_wrap_insert( coll )
 
   for i=1,10 do
     local values = {}
-    values.a = 1
+    values.a = i
     values.b = '2'
     values.c = 3.1
     values.name = string.format('linbc%d',i)
@@ -116,6 +115,31 @@ local function test_mongo_wrap_find(coll )
     f1()
 end
 
+--测试更新
+local function test_mongo_wrap_update( coll )
+    ffi.cdef[[
+      int rand(void);
+      void srand(unsigned seed);
+      time_t time(void*);
+    ]]
+    local values = {}
+    values.a = 1
+    values.name = 'linbc--'
+    coll:update(nil,  { ["$set"] = values} , true)
+   
+    values = {}
+    values.a = 2
+    values.name = 'linbc--'
+    coll:insert(values)
+
+    local wheres = {}
+    wheres.name = 'linbc--'
+    values = {}
+    values.a = 100
+    values.name = 'linbc--'
+    coll:update(wheres, { ["$set"] = values} , true, true)
+end
+
 function test_mongo_c_driver_wrap( ... )
   local authuristr = "mongodb://dev:asdf@192.168.30.11:27022/test?authMechanism=SCRAM-SHA-1"
   local mongoc_wrap = mongoc_wrap.new(authuristr)
@@ -126,7 +150,9 @@ function test_mongo_c_driver_wrap( ... )
   local collection_wrap = database_wrap['test']
 
   --test_mongo_wrap_insert(collection_wrap)
-  test_mongo_wrap_find(collection_wrap)
+  --test_mongo_wrap_find(collection_wrap)
+  test_mongo_wrap_update(collection_wrap)
+
   mongoc_client:mongoc_cleanup()
 
 end
