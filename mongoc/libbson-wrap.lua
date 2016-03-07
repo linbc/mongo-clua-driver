@@ -96,6 +96,11 @@ bson_iter_document (const bson_iter_t   *iter,
                     uint32_t            *document_len,
                     const uint8_t      **document);
 					
+void
+bson_iter_array (const bson_iter_t   *iter,
+                 uint32_t            *array_len,
+                 const uint8_t      **array);
+					
 bool
 bson_init_static (bson_t        *b,
                   const uint8_t *data,
@@ -175,7 +180,13 @@ bool
 bson_append_document (bson_t       *bson,       
                       const char   *key,        
                       int           key_length, 
-                      const bson_t *value);  				
+                      const bson_t *value);  
+
+bool
+bson_append_array (bson_t       *bson,
+                   const char   *key,
+                   int           key_length,
+                   const bson_t *array);					  
 ]]
 
 --from bson-oid.h

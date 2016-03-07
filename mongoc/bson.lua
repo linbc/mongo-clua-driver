@@ -17,6 +17,7 @@ local bson_append_int32 = libbson.bson_append_int32
 local bson_append_oid = libbson.bson_append_oid
 local bson_append_utf8 = libbson.bson_append_utf8
 local bson_append_document = libbson.bson_append_document
+local bson_append_array = libbson.bson_append_array
 
 local bson_iter_init = libbson.bson_iter_init
 local bson_iter_next = libbson.bson_iter_next
@@ -28,9 +29,14 @@ local bson_iter_int32 = libbson.bson_iter_int32
 local bson_iter_int64 = libbson.bson_iter_int64
 local bson_iter_oid = libbson.bson_iter_oid
 local bson_iter_document = libbson.bson_iter_document
+local bson_iter_array = libbson.bson_iter_array
 local bson_init_static = libbson.bson_init_static
 
 local bson_oid_to_string = libbson.bson_oid_to_string
+
+local function tableIsArray(value)
+	return type(value) == "table" and #value > 0
+end
 
 local bson = {}
 
@@ -76,8 +82,13 @@ function bson:append_utf8( key, value )
 end
 
 function bson:append_document( key, value )
-	--assert(type(value) == 'table')
+	--assert(type(value) == 'table' and #value == 0)
 	return bson_append_document(self.ptr, key, string.len(key), value)
+end
+
+function bson:append_array( key, value )
+	--assert(type(value) == 'table' and #value > 0)
+	return bson_append_array(self.ptr, key, string.len(key), value)
 end
 
 --从一个lua_number中生成cdata类型
@@ -104,8 +115,12 @@ function bson:append_value( key, value )
 	    end
 	elseif typ == 'table' then
 		local the_bson = bson.new()
-		the_bson:write_values(value)
-		return self:append_document(key, the_bson.ptr)
+		local isArray = the_bson:write_values(value)
+		if isArray then
+			return self:append_array(key, the_bson.ptr)
+		else
+			return self:append_document(key, the_bson.ptr)
+		end
 	elseif typ == 'cdata' then
 		local typ2 = tostring(ffi.typeof(value))
 		if typ2 == 'ctype<int>' then
@@ -144,6 +159,13 @@ function bson:get_value_by_iter( iter )
 		local the_bson = bson.new()
 		bson_init_static(the_bson.ptr, document[0], document_len[0])
 		return the_bson:read_values()
+	elseif t == libbson.BSON_TYPE_ARRAY then
+		local array_len = ffi_gc( ffi.new("uint32_t[1]", 1), ffi.free)
+		local array = ffi_gc( ffi.new("const uint8_t*[1]"), ffi.free)
+		bson_iter_array(iter, array_len, array)
+		local the_bson = bson.new()
+		bson_init_static(the_bson.ptr, array[0], array_len[0])
+		return the_bson:read_values(true)
 	else
 		--TODO:未支持的类型在这里加一下
 		error('does not support:',key,	t)
@@ -161,22 +183,33 @@ function bson:read_value( key )
 	end
 end
 
-function bson:read_values( )
+function bson:read_values( isArray )
 	local iter = ffi_gc( ffi.new('bson_iter_t'), ffi.free)
 	bson_iter_init (iter, assert(self.ptr))
 
 	local values = {}
 	while bson_iter_next(iter) do
 		local k = ffi.string( bson_iter_key(iter) )
+		if isArray then
+			k = tonumber(k) + 1
+		end
 		values[k] = self:get_value_by_iter(iter)
 	end
 	return values
 end
 
 function bson:write_values( values )
-	for k,v in pairs(values) do
-		self:append_value( k,v )
+	local isArray = tableIsArray(values)
+	if isArray then
+		for i = 1, #values do
+			self:append_value( tostring(i - 1), values[i] )
+		end
+	else
+		for k,v in pairs(values) do
+			self:append_value( k,v )
+		end
 	end
+	return isArray
 end
 
 function bson.runTests( )

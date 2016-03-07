@@ -57,7 +57,7 @@ end
 local function bsonTests( )
 	local values = {}
 	values.a = 1
-	values.b = {a = '2'}
+	values.b = {'2'}
 	values.c = 3.1
 	values.d = ffi_new('int32_t', 4)
 	values.e = ffi_new('int64_t',5)
@@ -65,19 +65,21 @@ local function bsonTests( )
 	for k,v in pairs(values) do
 		print(k,v)
 	end
-	print(1111111)
+	print('----------------------------------')
 	local the_bson = bson.new()
 	the_bson:write_values(values)
 
 	local values2 = the_bson:read_values()
 	for k,v in pairs(values) do
-		if type(values2[k]) == "table" then
-			for _k, _v in pairs(values2[k]) do
-			print("----", _k, _v)
-			end
-		end
 		print(k,v, values2[k])
-		--assert(v == values2[k])
+		if type(values2[k]) == "table" then
+			print("table size", #values2[k])
+			for _k, _v in pairs(values2[k]) do
+			print("		", _k, _v)
+			end
+		else
+			assert(v == values2[k])
+		end
 	end
 	print('bson.runTests test ok!')
 end
