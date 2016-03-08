@@ -145,7 +145,8 @@ end
 --@wheres: 	查询的条件
 --@fields: 	返回的字段 
 function mongo_collection_wrap:findOne(wheres, fields)
-	return self:find(wheres, fields, 1)
+	local cursor = coll:find(wheres, fields, 1)
+	return cursor:next()
 end
 
 
